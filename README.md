@@ -94,4 +94,29 @@ A API retornará uma resposta JSON com dados de temperatura em Celsius, Fahrenhe
 
 ## Deploy
 
-TODO
+O deploy é realizado automaticamente no Google Cloud Run através de um workflow do GitHub Actions. O workflow é acionado
+a cada push na branch `master`.
+
+### Configuração do Deploy
+
+1. Configure os seguintes secrets no seu repositório GitHub:
+	- `GCP_SA_KEY`: Chave de conta de serviço do Google Cloud em formato JSON
+	- `WEATHER_API_KEY`: Chave da WeatherAPI
+
+2. O workflow realiza as seguintes etapas:
+	- Autentica com o Google Cloud
+	- Configura o Google Cloud SDK
+	- Cria um repositório no Artifact Registry (se não existir)
+	- Constrói e faz push da imagem Docker para o Artifact Registry
+	- Deploya a imagem para o Cloud Run
+	- Limpa imagens antigas do Artifact Registry
+
+3. Após o deploy, a URL do serviço Cloud Run é exibida nos logs do workflow.
+
+## Acesso ao Serviço Deployado
+
+O serviço deployado no Cloud Run está configurado para permitir acesso não autenticado.
+
+### URL do serviço
+
+O serviço se encontra na seguinte URL: https://cep-weather-api-iiuuzoq6ia-nn.a.run.app/
