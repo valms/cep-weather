@@ -7,6 +7,7 @@ on:
 
 env:
     PROJECT_ID: fullcycle-p
+    API_KEY: ${{ secrets.WEATHER_API_KEY }}
     SERVICE_NAME: cep-weather-api
     REGION: northamerica-northeast1
     APP_NAME: cep-weather-api
@@ -30,19 +31,27 @@ jobs:
             -   name: Authorize Docker push
                 run: gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
 
-            -   name: Build and push Docker image
+            -   name: Create Artifact Registry repository
                 run: |
-                    docker build . --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.APP_NAME }}:${{ github.sha }}
-                    docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.APP_NAME }}:${{ github.sha }}
+                    gcloud artifacts repositories create ${{ env.SERVICE_NAME }} \
+                      --repository-format=docker \
+                      --location=${{ env.REGION }} \
+                      --project=${{ env.PROJECT_ID }}
 
-            - name: Deploy to Cloud Run
-              run: |
-                  gcloud run deploy ${{ env.SERVICE_NAME }} \
-                    --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.APP_NAME }}:${{ github.sha }} \
-                    --platform managed \
-                    --region ${{ env.REGION }} \
-                    --allow-unauthenticated \
-                    --set-env-vars "API_KEY=${{ secrets.WEATHER_API_KEY }}"
+            -   name: Build and Push Container
+                run: |
+                    docker build -t "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}" .
+                    docker push "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+
+            -   name: Deploy to Cloud Run
+                id: deploy
+                uses: google-github-actions/deploy-cloudrun@v2
+                with:
+                    service: ${{ env.SERVICE_NAME }}
+                    region: ${{ env.REGION }}
+                    image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+                    env_vars: |
+                        API_KEY=${{ env.API_KEY }}
 
             -   name: Clean up old images
                 run: gcloud artifacts docker images delete ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.APP_NAME }} --quiet
