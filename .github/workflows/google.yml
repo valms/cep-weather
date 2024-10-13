@@ -31,12 +31,18 @@ jobs:
             -   name: Authorize Docker push
                 run: gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
 
-            -   name: Create Artifact Registry repository
+            -   name: Check and Create Artifact Registry repository
                 run: |
-                    gcloud artifacts repositories create ${{ env.SERVICE_NAME }} \
-                      --repository-format=docker \
-                      --location=${{ env.REGION }} \
-                      --project=${{ env.PROJECT_ID }}
+                    if ! gcloud artifacts repositories describe ${{ env.SERVICE_NAME }} \
+                        --location=${{ env.REGION }} \
+                        --project=${{ env.PROJECT_ID }} > /dev/null 2>&1; then
+                      gcloud artifacts repositories create ${{ env.SERVICE_NAME }} \
+                        --repository-format=docker \
+                        --location=${{ env.REGION }} \
+                        --project=${{ env.PROJECT_ID }}
+                    else
+                      echo "Repository ${{ env.SERVICE_NAME }} already exists."
+                    fi
 
             -   name: Build and Push Container
                 run: |
