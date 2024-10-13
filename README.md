@@ -119,4 +119,4 @@ O serviço deployado no Cloud Run está configurado para permitir acesso não au
 
 ### URL do serviço
 
-O serviço se encontra na seguinte URL: https://cep-weather-api-iiuuzoq6ia-nn.a.run.app/
+O serviço se encontra na seguinte URL: [https://cep-weather-api-iiuuzoq6ia-nn.a.run.app/](https://cep-weather-api-iiuuzoq6ia-rj.a.run.app)
