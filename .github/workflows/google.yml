@@ -52,6 +52,7 @@ jobs:
                     image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
                     env_vars: |
                         API_KEY=${{ env.API_KEY }}
+                    flags: '--allow-unauthenticated'
 
             -   name: Clean up old images
                 run: gcloud artifacts docker images delete ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.APP_NAME }} --quiet
