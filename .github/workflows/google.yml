@@ -13,7 +13,7 @@ env:
     PROJECT_ID: fullcycle-p
     API_KEY: ${{ secrets.WEATHER_API_KEY }}
     SERVICE_NAME: cep-weather-api
-    REGION: northamerica-northeast1
+    REGION: southamerica-east1
     APP_NAME: cep-weather-api
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
                 uses: 'google-github-actions/setup-gcloud@v2'
 
             -   name: Authorize Docker push
-                run: gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
+                run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
             -   name: Check and Create Artifact Registry repository
                 run: |
